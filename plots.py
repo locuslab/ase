@@ -134,11 +134,15 @@ def plot_num_sub_optimal(agent_names, experiment):
         num_sub_opt = np.array(all_num_sub_opt)
         
         print('Average unsafe states for agent %s: %0.2f' % (agent_name, num_unsafe_states.mean()))
-        xs = np.arange(num_steps)/1000
+        subsample_size = 100
+        xs = np.arange(num_steps) / 1000
         num_sub_opt = num_sub_opt / 1000
         zorder = len(agent_names) - agent_i
-        plt.plot(xs, num_sub_opt.mean(axis=0), color=tableau10[agent_i], label=agent_labels_dict[agent_name], zorder=zorder)
-        plt.fill_between(xs, num_sub_opt.max(axis=0), num_sub_opt.min(axis=0), color=tableau10[agent_i], alpha=0.5, zorder=zorder)
+        plt.plot(xs[::subsample_size], num_sub_opt.mean(axis=0)[::subsample_size],
+                 color=tableau10[agent_i], label=agent_labels_dict[agent_name], zorder=zorder)
+        plt.fill_between(xs[::subsample_size],
+                         num_sub_opt.max(axis=0)[::subsample_size], num_sub_opt.min(axis=0)[::subsample_size],
+                         color=tableau10[agent_i], alpha=0.5, zorder=zorder)
 
     plt.legend(fontsize=18)
     plt.xlabel('Time steps (thousands)', fontsize=18)
@@ -258,15 +262,15 @@ def plot_heat_map(agent_names, experiment):
 
 
 if __name__ == '__main__':
-    experiment = 36  # 36, 38
+    experiment = 1  # 1, 2
     agent_names = ['ase-agent', 'undirected-ase-agent', 'mbie-agent', 'safe-rmax-agent', 'rmax-agent', 'safe-egreedy-agent', 'egreedy-agent']
     plot_num_sub_optimal(agent_names, experiment)
     
-    experiment = 38
+    experiment = 2
     agent_names = ['ase-agent', 'mbie-agent', 'safe-rmax-agent']
     plot_heat_map(agent_names, experiment)
 
-    experiment = 36
+    experiment = 1
     experiment_dir = os.path.join(os.getcwd(), 'results', 'experiment%02d' % experiment, agent_names[0], 'trial%02d' % 1)
     param_dict_fn = os.path.join(experiment_dir, 'param_dict.pkl')
     param_dict = pickle.load(open(param_dict_fn, 'rb'))
