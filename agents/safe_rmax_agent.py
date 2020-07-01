@@ -1,11 +1,10 @@
 # Python imports.
-import numpy as np
 
 # Other imports.=
-from safe_agent import SafeAgent
+from agents.safe_agent import SafeAgent
 
 from constants import *
-import value_iteration
+from dynamic_programming import value_iteration
 
 
 class SafeRMaxAgent(SafeAgent):
@@ -109,11 +108,11 @@ class SafeRMaxAgent(SafeAgent):
                 reward_matrix = np.where(reward_matrix < 0, -100, reward_matrix)
             
             _, self.q = value_iteration.rmax_value_iteration(transition_matrix, reward_matrix, terminal_states,
-                                                                confident_actions, self.vmax,
-                                                                horizon=self.vi_horizon,
-                                                                gamma=self.gamma,
-                                                                action_mask=action_mask,
-                                                                q_default=-100,
-                                                                use_sparse_matrices=True)
+                                                             confident_actions, self.vmax,
+                                                             horizon=self.vi_horizon,
+                                                             gamma=self.gamma,
+                                                             action_mask=action_mask,
+                                                             q_default=-100,
+                                                             use_sparse_matrices=True)
         
         self.step_number += 1

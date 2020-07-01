@@ -5,12 +5,11 @@ from multiprocessing import Pool
 import argparse
 import yaml
 
-import discrete_platformer
-import unsafe_grid_world
-from ase_agent import ASEAgent
-from safe_rmax_agent import SafeRMaxAgent
-from safe_epsilon_greedy import SafeEGreedyAgent
-from mbie_agent import MBIEAgent
+from environments import discrete_platformer, unsafe_grid_world
+from agents.ase_agent import ASEAgent
+from agents.safe_rmax_agent import SafeRMaxAgent
+from agents.safe_epsilon_greedy import SafeEGreedyAgent
+from agents.mbie_agent import MBIEAgent
 
 
 def setup_unsafe_grid_world_env(file_name, gui=False):

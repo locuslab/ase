@@ -1,12 +1,10 @@
 # Python imports.
-import numpy as np
 
 # Other imports.
 from simple_rl.agents.AgentClass import Agent
 
 from constants import *
-from ase_transition_table import AnalogousStateTransitionTable
-import value_iteration
+from dynamic_programming.ase_transition_table import AnalogousStateTransitionTable
 
 
 class SafeAgent(Agent):

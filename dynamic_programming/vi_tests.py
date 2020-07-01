@@ -1,10 +1,9 @@
 import unittest
-import numpy as np
 import scipy.sparse as sp
 
 from constants import *
 
-import value_iteration
+from dynamic_programming import value_iteration
 import value_iteration_cy
 
 

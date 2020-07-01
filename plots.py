@@ -1,16 +1,13 @@
 import os
-import numpy as np
 import pickle
-from scipy.sparse import csr_matrix, lil_matrix
+from scipy.sparse import lil_matrix
 from matplotlib import pyplot as plt
 import cv2
 from scipy import interpolate
 
 from constants import *
-import discrete_platformer
-import value_iteration
-import unsafe_grid_world
-
+from environments import discrete_platformer, unsafe_grid_world
+from dynamic_programming import value_iteration
 
 tableau10 = [(31, 119, 180), (255, 127, 14), (44, 160, 44), (214, 39, 40), (148, 103, 189),
              (140, 86, 75), (227, 119, 194), (127, 127, 127), (188, 189, 34), (23, 190, 207)]
@@ -77,9 +74,9 @@ def plot_num_sub_optimal(agent_names, experiment):
     true_transitions = true_transitions.tocsr()
 
     optimal_values, optimal_qs = value_iteration.value_iteration(true_transitions, true_rewards, terminal_states,
-                                                    horizon=param_dict['vi_horizon'], gamma=param_dict['gamma'],
-                                                    action_mask=true_rewards >= 0, q_default=-np.infty,
-                                                    use_sparse_matrices=True)
+                                                                 horizon=param_dict['vi_horizon'], gamma=param_dict['gamma'],
+                                                                 action_mask=true_rewards >= 0, q_default=-np.infty,
+                                                                 use_sparse_matrices=True)
     # optimal_values, optimal_qs = value_iteration.value_iteration(true_transitions, true_rewards, terminal_states,
     #                                                              horizon=param_dict['vi_horizon'],
     #                                                              gamma=param_dict['gamma'],

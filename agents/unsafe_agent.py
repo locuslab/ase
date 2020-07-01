@@ -3,15 +3,12 @@
 # Python imports.
 import random
 import numpy as np
-import time
-from collections import defaultdict
-import operator
 
 # Other imports.
 from simple_rl.agents.AgentClass import Agent
 
-from transition_table import TransitionTable
-import value_iteration
+from dynamic_programming.transition_table import TransitionTable
+from dynamic_programming import value_iteration
 
 
 class UnsafeAgent(Agent):

@@ -496,7 +496,7 @@ if __name__ == "__main__":
     # player = Player()
     # level = Level_01(player)
     # env = Platformer(player, level)
-    env, safe_locs = env_from_file('discrete_platformer_levels/level6.txt')
+    env, safe_locs = env_from_file('../discrete_platformer_levels/level6.txt')
 
     # Loop until the user clicks the close button.
     done = False

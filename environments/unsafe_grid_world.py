@@ -4,10 +4,8 @@ import os
 from scipy.sparse import csr_matrix, lil_matrix
 import pygame
 
-import mdp_visualizer
 from simple_rl.tasks import GridWorldMDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
-from simple_rl.tasks.grid_world.grid_visualizer import _draw_state as draw_state
 
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
@@ -188,7 +186,7 @@ class UnsafeGridWorldMDP(GridWorldMDP):
 
         # Update GUI
         if self.gui:
-            self.update_gui(0)
+            self.update_gui()
     
     def update_gui(self):
         cur_state = self.get_curr_state()

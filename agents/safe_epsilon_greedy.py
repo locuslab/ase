@@ -1,11 +1,9 @@
 # Python imports.
-import numpy as np
 
-# Other imports.=
-from safe_agent import SafeAgent
-
+# Other imports.
+from agents.safe_agent import SafeAgent
 from constants import *
-import value_iteration
+from dynamic_programming import value_iteration
 
 
 class SafeEGreedyAgent(SafeAgent):
@@ -90,8 +88,8 @@ class SafeEGreedyAgent(SafeAgent):
                 reward_matrix = np.where(reward_matrix < 0, -100, reward_matrix)
             
             _, self.q = value_iteration.value_iteration(transition_matrix, reward_matrix, terminal_states,
-                                                           horizon=self.vi_horizon,
-                                                           gamma=self.gamma,
-                                                           action_mask=action_mask,
-                                                           q_default=-100,
-                                                           use_sparse_matrices=True)
+                                                        horizon=self.vi_horizon,
+                                                        gamma=self.gamma,
+                                                        action_mask=action_mask,
+                                                        q_default=-100,
+                                                        use_sparse_matrices=True)

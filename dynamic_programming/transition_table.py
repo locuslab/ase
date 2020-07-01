@@ -1,9 +1,5 @@
 import numpy as np
-from scipy import sparse
 from scipy.sparse import csr_matrix, lil_matrix
-
-import value_iteration
-
 
 DTYPE = np.float32
 

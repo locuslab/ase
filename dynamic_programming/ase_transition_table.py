@@ -1,10 +1,8 @@
-import numpy as np
 import os
 import pickle
-from scipy import sparse
-from scipy.sparse import csr_matrix, lil_matrix
+from scipy.sparse import csr_matrix
 
-from transition_table import TransitionTable
+from dynamic_programming.transition_table import TransitionTable
 from constants import *
 
 

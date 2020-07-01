@@ -1,7 +1,4 @@
 import numpy as np
-import cvxpy as cp
-
-import value_iteration
 
 
 class TransitionTable:
