@@ -1,0 +1,19 @@
+environment: 'unsafe_grid_world'
+level: 'maps/five_lava_island.txt'
+agents: 'all'
+
+gamma: 0.9
+vi_horizon: 50
+beta_T: 0.5
+tau: 0.1
+update_frequency: 50
+
+epsilon: 0.1
+annealing_time: 5000
+
+max_steps: 40000
+experiment: 1
+num_trials: 5
+#num_threads: 24
+num_threads: 1
+use_sparse_matrices: True

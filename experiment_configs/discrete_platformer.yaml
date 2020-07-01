@@ -1,0 +1,19 @@
+environment: 'discrete_platformer'
+level: 'discrete_platformer_levels/level7.txt'
+agents: 'all'
+
+gamma: 0.95
+vi_horizon: 70
+beta_T: 0.25
+tau: 0.1
+update_frequency: 100
+
+epsilon: 0.1
+annealing_time: 20000
+
+max_steps: 30000
+experiment: 1
+num_trials: 5
+#num_threads: 24
+num_threads: 1
+use_sparse_matrices: True
