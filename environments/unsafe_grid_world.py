@@ -198,7 +198,6 @@ class UnsafeGridWorldMDP(GridWorldMDP):
 
     def _draw_state(self,
                     state,
-                    agent=None,
                     draw_statics=False,
                     agent_shape=None):
     

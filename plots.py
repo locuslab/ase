@@ -2,8 +2,10 @@ import os
 import pickle
 from scipy.sparse import lil_matrix
 from matplotlib import pyplot as plt
+import matplotlib.image as mpimg
 import cv2
 from scipy import interpolate
+from tqdm import tqdm
 
 from constants import *
 from environments import discrete_platformer, unsafe_grid_world
@@ -155,13 +157,10 @@ def plot_num_sub_optimal(agent_names, experiment):
     plt.show()
 
 
-def plot_heat_map(agent_names, experiment):
+def plot_heat_map(agent_names, experiment, indices=None, show_agent=False):
     experiment_dir = os.path.join(os.getcwd(), 'results', 'experiment%02d' % experiment, agent_names[0], 'trial%02d' % 1)
-    state_history_fn = os.path.join(experiment_dir, 'state_history.pkl')
     param_dict_fn = os.path.join(experiment_dir, 'param_dict.pkl')
-    state_history = pickle.load(open(state_history_fn, 'rb'))
     param_dict = pickle.load(open(param_dict_fn, 'rb'))
-    num_trials = param_dict['num_trials']
     
     env, _ = discrete_platformer.env_from_file(param_dict['level'])
     states = env.get_all_states()
@@ -173,92 +172,104 @@ def plot_heat_map(agent_names, experiment):
     max_y = max(ys)
 
     for agent_name in agent_names:
-        plt.figure(figsize=(40, 10))
-        
-        map_image = env.gui.map_image(min_x, max_x, min_y, max_y)
-        plt.imshow(map_image, alpha=1)
-        plt.xlim([5 * discrete_platformer.TILE_WIDTH, map_image.shape[1] - 5 * discrete_platformer.TILE_WIDTH])
-        
-        heat_map = np.zeros([max_x - min_x + 1, max_y - min_y + 1])
-        xs = []
-        ys = []
-        in_air = []
-        rs = []
-        safe_trajectory = []
-        
-        t = 0
-        
+        trial = 0
         experiment_dir = os.path.join(os.getcwd(), 'results', 'experiment%02d' % experiment, agent_name,
-                                      'trial%02d' % (t + 1))
+                                      'trial%02d' % (trial + 1))
         param_dict_fn = os.path.join(experiment_dir, 'param_dict.pkl')
         state_history_fn = os.path.join(experiment_dir, 'state_history.pkl')
         reward_history_fn = os.path.join(experiment_dir, 'reward_history.pkl')
     
-        param_dict = pickle.load(open(param_dict_fn, 'rb'))
-        state_history = pickle.load(open(state_history_fn, 'rb'))
-        reward_history = pickle.load(open(reward_history_fn, 'rb'))
+        # param_dict = pickle.load(open(param_dict_fn, 'rb'))
+        full_state_history = pickle.load(open(state_history_fn, 'rb'))
+        full_reward_history = pickle.load(open(reward_history_fn, 'rb'))
         
-        for i in range(len(state_history)):
-            state = state_history[i]
-            x = state.x - min_x
-            y = max_y - (state.y - min_y)
-            in_air.append(1 if state.y > 1 else 0)
-            heat_map[x, y] += 1
-            xs.append((x + 1.5) * discrete_platformer.TILE_WIDTH)
-            ys.append((y + 1) * discrete_platformer.TILE_HEIGHT)
-            if i < len(reward_history):
-                r = reward_history[i]
-                rs.append(r)
-                if r < 0:
-                    safe_trajectory.append(0)
-                elif r > 0:
-                    safe_trajectory.append(1)
-        safe_trajectory.append(0)
-        
-        trajectory_index = 0
-        j = 0
-        for i in range(len(state_history)):
-            if i > 0 and rs[i - 1] != 0:
-                trajectory_index += 1
-            if (i > 0 and rs[i - 1] != 0 and i > j) \
-                    or (i > 0 and in_air[i-1] and not in_air[i]) \
-                    or (i < len(state_history) - 1 and not in_air[i] and in_air[i+1]):
-                color = 'r' if rs[i - 1] < 0 else 'b'
-                alpha = 0.1 if rs[i - 1] < 0 else 0.02
-                if i > 0 and in_air[i-1] and xs[j+1] != xs[i] and i - j >= 3:
-                    tck, u = interpolate.splprep([xs[j:i + 1], ys[j:i + 1]], s=0)
-                    unew = np.arange(0, 1.01, 0.01)
-                    new_points = interpolate.splev(unew, tck)
-                    plt.plot(new_points[0], new_points[1], alpha=alpha, lw=5, solid_capstyle="round", c=color)
-                else:
-                    length_of_dangerous_traj = 2
-                    if rs[i - 1] < 0 and i - length_of_dangerous_traj > j:
-                        j_prime = i - length_of_dangerous_traj
-                        plt.plot(xs[j:j_prime+1], ys[j:j_prime+1], alpha=0.02, lw=5, solid_capstyle="round", c='b')
-                        j = j_prime
-                    plt.plot(xs[j:i+1], ys[j:i+1], alpha=alpha, lw=5, solid_capstyle="round", c=color)
+        if indices is None:
+            indices = [-1]
 
-                if rs[i] != 0:
-                    j = i + 1
-                else:
-                    j = i
+        for index in tqdm(indices, 'Making heatmaps for %s' % agent_name):
+            plt.figure(figsize=(40, 10))
+            plt.ioff()
+
+            state_history = full_state_history[:index]
+            reward_history = full_reward_history[:index]
             
-        # heat_map /= num_trials
-        # heat_map = heat_map.transpose([1, 0])
-        # heat_map = cv2.resize(heat_map, (map_image.shape[1], map_image.shape[0]), interpolation=cv2.INTER_NEAREST)
-        # plt.imshow(heat_map, alpha=1.0)
-        
-        # plt.imshow(map_image, alpha=0.5)
+            heat_map = np.zeros([max_x - min_x + 1, max_y - min_y + 1])
+            xs = []
+            ys = []
+            in_air = []
+            rs = []
+
+            if show_agent:
+                env.gui.update(state_history[-1])
+            map_image = env.gui.map_image(min_x, max_x, min_y, max_y)
+            plt.imshow(map_image, alpha=1)
+            plt.xlim([5 * discrete_platformer.TILE_WIDTH, map_image.shape[1] - 5 * discrete_platformer.TILE_WIDTH])
     
-        plt.tick_params(axis='both', which='both',
-                        bottom=False, top=False, labelbottom=False,
-                        right=False, left=False, labelleft=False)
-    
-        experiment_dir = os.path.join(os.getcwd(), 'results', 'experiment%02d' % experiment)
-        plot_fn = os.path.join(experiment_dir, 'heat_map_%s.pdf' % agent_name)
-        plt.savefig(plot_fn, bbox_inches='tight')
+            for i in range(len(state_history)):
+                state = state_history[i]
+                x = state.x - min_x
+                y = max_y - (state.y - min_y)
+                in_air.append(1 if state.y > 1 else 0)
+                heat_map[x, y] += 1
+                xs.append((x + 1.5) * discrete_platformer.TILE_WIDTH)
+                ys.append((y + 1) * discrete_platformer.TILE_HEIGHT)
+                if i < len(reward_history):
+                    r = reward_history[i]
+                    rs.append(r)
+
+            trajectory_index = 0
+            j = 0
+            for i in range(len(state_history)):
+                if i > 0 and rs[i - 1] != 0:
+                    trajectory_index += 1
+                if (i > 0 and rs[i - 1] != 0 and i > j) \
+                        or (i > 0 and in_air[i-1] and not in_air[i]) \
+                        or (i < len(state_history) - 1 and not in_air[i] and in_air[i+1]):
+                    color = 'r' if rs[i - 1] < 0 else 'b'
+                    alpha = 0.1 if rs[i - 1] < 0 else 0.02
+                    if i > 0 and in_air[i-1] and xs[j+1] != xs[i] and i - j >= 3:
+                        tck, u = interpolate.splprep([xs[j:i + 1], ys[j:i + 1]], s=0)
+                        unew = np.arange(0, 1.01, 0.01)
+                        new_points = interpolate.splev(unew, tck)
+                        plt.plot(new_points[0], new_points[1], alpha=alpha, lw=5, solid_capstyle="round", c=color)
+                    else:
+                        length_of_dangerous_traj = 2
+                        if rs[i - 1] < 0 and i - length_of_dangerous_traj > j:
+                            j_prime = i - length_of_dangerous_traj
+                            plt.plot(xs[j:j_prime+1], ys[j:j_prime+1], alpha=0.02, lw=5, solid_capstyle="round", c='b')
+                            j = j_prime
+                        plt.plot(xs[j:i+1], ys[j:i+1], alpha=alpha, lw=5, solid_capstyle="round", c=color)
+
+                    if rs[i] != 0:
+                        j = i + 1
+                    else:
+                        j = i
+                
+            # heat_map /= num_trials
+            # heat_map = heat_map.transpose([1, 0])
+            # heat_map = cv2.resize(heat_map, (map_image.shape[1], map_image.shape[0]), interpolation=cv2.INTER_NEAREST)
+            # plt.imshow(heat_map, alpha=1.0)
+            
+            # plt.imshow(map_image, alpha=0.5)
         
-        plt.show()
+            plt.tick_params(axis='both', which='both',
+                            bottom=False, top=False, labelbottom=False,
+                            right=False, left=False, labelleft=False)
+        
+            experiment_dir = os.path.join(os.getcwd(), 'results', 'experiment%02d' % experiment)
+            if index is not None:
+                plot_dir = os.path.join(experiment_dir, 'plots', 'heat_map_video_%s_exploit' % agent_name)
+                if not os.path.exists(plot_dir):
+                    os.makedirs(plot_dir)
+                plot_path = os.path.join(plot_dir, '%06d.jpg' % index)
+            else:
+                plot_dir = os.path.join(experiment_dir, 'plots')
+                if not os.path.exists(plot_dir):
+                    os.makedirs(plot_dir)
+                plot_path = os.path.join(plot_dir, 'heat_map_%s.pdf' % agent_name)
+            plt.savefig(plot_path, bbox_inches='tight')
+        
+            plt.close()
 
 
 if __name__ == '__main__':
